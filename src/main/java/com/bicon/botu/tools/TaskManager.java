@@ -24,6 +24,8 @@ import org.quartz.TriggerBuilder;
 import org.quartz.core.jmx.JobDetailSupport;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.triggers.CronTriggerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bicon.botu.job.ESNlpJob;
 
@@ -39,10 +41,12 @@ import com.bicon.botu.job.ESNlpJob;
 public class TaskManager {
 
 	
+	private static Logger logger = LoggerFactory.getLogger(TaskManager.class);
+	
 	 private final static String JOB_GROUP_NAME = "QUARTZ_JOBGROUP_NAME";//任务组
 	private static final String TRIGGER_NAME = "ES_TRIGGER";
 	
-	private static final String CORN_EXPRESS = "0 0 12 * * ?";
+	private static final String CORN_EXPRESS = "0 0 01 * * ?";
 	
 	//private static final String CORN_EXPRESS = "0/5 * * * * ? ";
 	
@@ -66,7 +70,7 @@ public class TaskManager {
 		try {
 			scheduler.scheduleJob(builderJobDetail(), builderTrigger());
 			scheduler.start();
-			System.out.println("定时任务已经启动起来!");
+			logger.info("定时任务已经启动起来!");
 		} catch (SchedulerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

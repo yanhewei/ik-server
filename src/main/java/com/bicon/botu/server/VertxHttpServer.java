@@ -11,42 +11,19 @@
  */  
 package com.bicon.botu.server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bicon.botu.cache.CacheManager;
 import com.bicon.botu.tools.Constans;
-import com.bicon.botu.tools.InvokerUtil;
 import com.bicon.botu.tools.TaskManager;
 import com.bicon.botu.ui.FreemarkUtil;
-import com.google.common.base.Strings;
 
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.CorsHandler;
-import io.vertx.ext.web.handler.StaticHandler;
 
 /**   
  * @ClassName:  VertxHttpServer   
@@ -58,11 +35,12 @@ import io.vertx.ext.web.handler.StaticHandler;
  * 
  */
 public class VertxHttpServer implements Server{
+	private  Logger logger = LoggerFactory.getLogger(this.getClass()); 
 	CacheManager cacheManager = CacheManager.instance();
 	@Override
 	public void doStart() {
 		try {
-			
+			logger.info("....................http服务开始启动..................");
 			TaskManager.start();
 			Vertx vertx =	Vertx.vertx();
 			Router router = Router.router(vertx);
@@ -107,6 +85,7 @@ public class VertxHttpServer implements Server{
 				httpServerResponse.close();
 			});
 			vertx.createHttpServer().requestHandler(router::accept).listen(8082);
+			logger.info("....................http服务启动完成..................");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

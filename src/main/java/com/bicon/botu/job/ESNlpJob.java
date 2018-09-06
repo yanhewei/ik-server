@@ -13,21 +13,28 @@ package com.bicon.botu.job;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateParser;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bicon.botu.cache.CacheManager;
 import com.bicon.botu.tools.Constans;
+import com.fasterxml.jackson.databind.ser.std.DateSerializer;
 import com.google.common.base.Strings;
 
 /**   
@@ -41,17 +48,17 @@ import com.google.common.base.Strings;
  */
 @DisallowConcurrentExecution
 public class ESNlpJob implements Job{
-
+	private  Logger logger = LoggerFactory.getLogger(this.getClass()); 
 	CacheManager cacheManager = CacheManager.instance();
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		System.out.println("分词更新任务开始");
+		logger.info("分词更新任务开始,开始时间:"+FastDateFormat.getInstance("yyyyMMddHHmmss").format(new Date()));
 		String uri = cacheManager.readvalue(Constans.URL_KEY);
 		if(!StringUtils.isBlank(uri)) {
 			String resmg = doexecute(uri,1000+"");
-			System.out.println(resmg);
+			logger.info(resmg);
 		}
-		System.out.println("分词更新任务结束");
+		logger.info("分词更新任务结束,结束时间:"+FastDateFormat.getInstance("yyyyMMddHHmmss").format(new Date()));
 	}
     
 	private String doexecute(String uri,String timeout) {
@@ -98,4 +105,6 @@ public class ESNlpJob implements Job{
 		}
 		return sb.toString();
 	}
+	
+	
 }
