@@ -42,9 +42,9 @@ public class TaskManager {
 	 private final static String JOB_GROUP_NAME = "QUARTZ_JOBGROUP_NAME";//任务组
 	private static final String TRIGGER_NAME = "ES_TRIGGER";
 	
-	//private static final String CORN_EXPRESS = "0 0 12 * * ?";
+	private static final String CORN_EXPRESS = "0 0 12 * * ?";
 	
-	private static final String CORN_EXPRESS = "0/5 * * * * ? ";
+	//private static final String CORN_EXPRESS = "0/5 * * * * ? ";
 	
 	public static Scheduler builderTask() {
 		try {
