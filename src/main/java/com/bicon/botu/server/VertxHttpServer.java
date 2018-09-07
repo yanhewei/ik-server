@@ -17,12 +17,18 @@ import org.slf4j.LoggerFactory;
 
 import com.bicon.botu.cache.CacheManager;
 import com.bicon.botu.tools.Constans;
+import com.bicon.botu.tools.PropertiesUtil;
 import com.bicon.botu.tools.TaskManager;
 import com.bicon.botu.ui.FreemarkUtil;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
 /**   
@@ -34,13 +40,18 @@ import io.vertx.ext.web.Router;
  * @Copyright: 2018 
  * 
  */
-public class VertxHttpServer implements Server{
+public class VertxHttpServer extends AbstractVerticle implements Server{
 	private  Logger logger = LoggerFactory.getLogger(this.getClass()); 
 	CacheManager cacheManager = CacheManager.instance();
 	@Override
 	public void doStart() {
 		try {
-			logger.info("....................http服务开始启动..................");
+			PropertiesUtil propertiesUtil =	new  PropertiesUtil("resource.properties",false);
+			String http_port = propertiesUtil.getvalue("http_port","8082");
+			
+			DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", http_port));
+			
+			//logger.info("....................http服务开始启动..................");
 			TaskManager.start();
 			Vertx vertx =	Vertx.vertx();
 			Router router = Router.router(vertx);
@@ -77,15 +88,22 @@ public class VertxHttpServer implements Server{
 				}else {
 					result = "没有获得参数";
 				}
-				
-				//String uri = "http://"+ipname+":"+port+"/question_and_answer_index/_update_by_query?conflicts=proceed";
-				//System.out.println(uri);
-				//String result = doexecute(uri,timeout);
 				httpServerResponse.end(result,"utf-8");
 				httpServerResponse.close();
 			});
 			vertx.createHttpServer().requestHandler(router::accept).listen(8082);
-			logger.info("....................http服务启动完成..................");
+			vertx.deployVerticle(VertxHttpServer.class.getName(), options, hander->{
+				String result =  hander.result();
+				boolean issuceede = hander.succeeded();
+				if(issuceede) {
+					logger.info("....................http服务部署完成,部署结果:"+result);
+				}else {
+					logger.info("....................http服务部署完成,部署结果:失败");
+				}
+				
+				
+			});
+			//logger.info("....................http服务启动完成..................");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
