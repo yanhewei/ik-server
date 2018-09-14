@@ -52,7 +52,7 @@ public class VertxHttpServer extends AbstractVerticle implements Server{
 			DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", http_port));
 			
 			//logger.info("....................http服务开始启动..................");
-			TaskManager.start();
+			
 			Vertx vertx =	Vertx.vertx();
 			Router router = Router.router(vertx);
 			//router.route().handler(CorsHandler.create("vertx\\.io").allowedMethod(HttpMethod.GET));
@@ -82,9 +82,11 @@ public class VertxHttpServer extends AbstractVerticle implements Server{
 				cacheManager.put(Constans.PORT_NAME, port);
 				String result = null;
 				if(!StringUtils.isBlank(ipname) && !StringUtils.isBlank(port)) {
-					String uri = "http://"+ipname+":"+port+"/question_and_answer_index/_update_by_query?conflicts=proceed";
-					cacheManager.put(Constans.URL_KEY, uri);
-					result = uri + "已经放入内存，只等定时任务去完成作业";
+					//也许有多个ip
+					
+					//String uri = "http://"+ipname+":"+port+"/question_and_answer_index/_update_by_query?conflicts=proceed";
+					//cacheManager.put(Constans.URL_KEY, uri);
+					result = "已经放入内存，只等定时任务去完成作业<a href='/'>返回</a>";
 				}else {
 					result = "没有获得参数";
 				}
@@ -95,10 +97,10 @@ public class VertxHttpServer extends AbstractVerticle implements Server{
 			vertx.deployVerticle(VertxHttpServer.class.getName(), options, hander->{
 				String result =  hander.result();
 				boolean issuceede = hander.succeeded();
+				boolean isfailed = hander.failed();
 				if(issuceede) {
 					logger.info("....................http服务部署完成,部署结果:"+result);
-				}else {
-					logger.info("....................http服务部署完成,部署结果:失败");
+					TaskManager.start();
 				}
 				
 				

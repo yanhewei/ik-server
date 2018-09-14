@@ -36,6 +36,8 @@ public class WordItemHander implements Handler<RoutingContext>{
 	@Override
 	public void handle(RoutingContext event) {
 		//读取文件
+		//进行文件扫描
+		
 				StringBuffer sb = new StringBuffer();
 				try {
 					Files.readLines(new File("C:\\test\\disease.txt"), 	Charset.defaultCharset(), new LineProcessor<String>() {
