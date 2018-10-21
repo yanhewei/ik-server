@@ -11,17 +11,25 @@
  */  
 package com.bicon.botu.server;
 
-import java.io.IOException;
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.bicon.botu.tools.InvokerUtil;
-import com.google.common.collect.Multimap;
+import com.bicon.botu.cache.CacheManager;
+import com.bicon.botu.tools.Constans;
+import com.bicon.botu.tools.PropertiesUtil;
+import com.bicon.botu.tools.TaskManager;
+import com.bicon.botu.ui.FreemarkUtil;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 
 /**   
  * @ClassName:  VertxHttpServer   
@@ -32,28 +40,72 @@ import io.vertx.ext.web.RoutingContext;
  * @Copyright: 2018 
  * 
  */
-public class VertxHttpServer implements Server{
-
+public class VertxHttpServer extends AbstractVerticle implements Server{
+	private  Logger logger = LoggerFactory.getLogger(this.getClass()); 
+	CacheManager cacheManager = CacheManager.instance();
 	@Override
 	public void doStart() {
-		String packages = "com.bicon.botu.restfull";
-	
 		try {
-			//List<String> classoflist = InvokerUtil.scanPackage(packages);
-			List<String> routers =	InvokerUtil.getRouters(packages);
+			PropertiesUtil propertiesUtil =	new  PropertiesUtil("resource.properties",false);
+			String http_port = propertiesUtil.getvalue("http_port","8082");
+			
+			DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", http_port));
+			
+			//logger.info("....................http服务开始启动..................");
+			
 			Vertx vertx =	Vertx.vertx();
 			Router router = Router.router(vertx);
-			router.route().handler( new ApiInterceptor(routers));//检查api路由的正确性
-			String str = "HTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFr,HTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFr,HTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和HTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFrHTTP/2是HTTP请求响应模型多帧协议。协议允许其他类型帧发送和接收。为了接收定制帧，应访在请求上应用customFr接收。为了接收定制帧，应访在请求上应用customFr";
-			router.route().handler(routingContext ->{
-				String uri = routingContext.request().path();
-				//System.out.println("----------"+uri);
-				HttpServerResponse httpServerResponse = 	routingContext.response();
-				httpServerResponse.putHeader("Content-Type", "text/html");
-				httpServerResponse.end(str);
+			//router.route().handler(CorsHandler.create("vertx\\.io").allowedMethod(HttpMethod.GET));
+			router.route("/word").handler( new WordItemHander());
+			router.route("/").handler( hander->{
+				//记载主页
+				HttpServerResponse httpServerResponse =	hander.response();
+				httpServerResponse.putHeader("content-type", "text/html");
+            
+				
+				String str = FreemarkUtil.loadIndex("index.ftl");
+				//System.out.println(str);
+				httpServerResponse.end(str,"utf-8");
+				httpServerResponse.close();
 			});
 			
+			router.route("/update").blockingHandler( hander->{
+				//记载主页
+				 
+				HttpServerResponse httpServerResponse =	hander.response();
+				httpServerResponse.putHeader("content-type", "text/html;charset=utf-8");
+				HttpServerRequest request = hander.request();
+				String ipname = request.getParam("ipname");
+				String port = request.getParam("port");
+				//String timeout = request.getParam("time");
+				cacheManager.put(Constans.HOST_NAME, ipname);
+				cacheManager.put(Constans.PORT_NAME, port);
+				String result = null;
+				if(!StringUtils.isBlank(ipname) && !StringUtils.isBlank(port)) {
+					//也许有多个ip
+					
+					//String uri = "http://"+ipname+":"+port+"/question_and_answer_index/_update_by_query?conflicts=proceed";
+					//cacheManager.put(Constans.URL_KEY, uri);
+					result = "已经放入内存，只等定时任务去完成作业<a href='/'>返回</a>";
+				}else {
+					result = "没有获得参数";
+				}
+				httpServerResponse.end(result,"utf-8");
+				httpServerResponse.close();
+			});
 			vertx.createHttpServer().requestHandler(router::accept).listen(8082);
+			vertx.deployVerticle(VertxHttpServer.class.getName(), options, hander->{
+				String result =  hander.result();
+				boolean issuceede = hander.succeeded();
+				boolean isfailed = hander.failed();
+				if(issuceede) {
+					logger.info("....................http服务部署完成,部署结果:"+result);
+					TaskManager.start();
+				}
+				
+				
+			});
+			//logger.info("....................http服务启动完成..................");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -61,6 +113,10 @@ public class VertxHttpServer implements Server{
 		
 	}
 
+	
+	
+	
+	
 	@Override
 	public void doStop() {
 		
